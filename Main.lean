@@ -3,7 +3,7 @@ Copyright (c) 2024 Mario Carneiro. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mario Carneiro
 -/
-import Lean.Util.Paths
+import Lean.Util.Path
 import Lean.Elab.Frontend
 import AstExport
 
@@ -48,13 +48,16 @@ partial def visit (mod : Name) :
 /-- The main entry point. See `help` for more information on arguments. -/
 unsafe def main (args : List String) : IO Unit := do
   initSearchPath (← findSysroot)
-  let srcSearchPath ← initSrcSearchPath
+  let srcSearchPath ← getSrcSearchPath
   match args with
   | ["--one", mainModuleName] =>
     let mainModuleName := String.toName mainModuleName
     enableInitializersExecution
     let ast ← ASTExport.getASTForModule srcSearchPath mainModuleName
     let path := Lean.modToFilePath ".lake/build/lib" mainModuleName "out.json"
+    -- Module exports can target nested paths without any previous code request.
+    if let some parent := path.parent then
+      IO.FS.createDirAll parent
     IO.FS.writeFile path (toJson ast).pretty
     println! "wrote to {path}"
   | mods =>

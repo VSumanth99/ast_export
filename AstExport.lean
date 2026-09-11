@@ -3,17 +3,18 @@ Copyright (c) 2024 Mario Carneiro. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mario Carneiro
 -/
-import Lean.Util.Paths
+import Lean.Util.Path
 import Lean.Elab.Frontend
 
 namespace ASTExport
 
 open Lean Elab Command Frontend
 
-instance : ToJson String.Pos := ⟨fun p => toJson p.1⟩
-deriving instance ToJson for String.Range
+-- Keep source positions as UTF-8 byte offsets in the existing JSON contract.
+instance : ToJson String.Pos.Raw := ⟨fun p => toJson p.1⟩
+deriving instance ToJson for Lean.Syntax.Range
 
-instance : ToJson Substring where
+instance : ToJson Substring.Raw where
   toJson s := toJson s.toString
 
 instance : ToJson SourceInfo where

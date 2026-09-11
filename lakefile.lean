@@ -1,10 +1,11 @@
 import Lake
 open Lake DSL
 
-package ast_export
+package ast_export where
+  -- Reuse the exact dependency checkouts and build artifacts used by the REPL.
+  packagesDir := "../mathlib4/.lake/packages"
 
-require mathlib from git
-  "https://github.com/leanprover-community/mathlib4.git" @ "v4.15.0"
+require mathlib from "../mathlib4"
 
 lean_lib AstExport
 
